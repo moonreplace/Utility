@@ -40,11 +40,12 @@ var Utility = Utility || {};
         },
         cookieUtil = {
             stringFormat : stringUtil.format,
-            cookieFormat: '{0}={1};expires={2};',
-            setCookie : function (name, value, expireDays) {
+            cookieFormat: '{0}={1};expires={2};path={3};',
+            setCookie : function (name, value, expireDays, path) {
                 var days = expireDays && parseInt(expireDays, 10) > 0 ? parseInt(expireDays, 10) : 30; //默认值，此 cookie 将被保存 30 天
+                path = path || '/';
                 dateUtil.setDay(days);
-                document.cookie = this.stringFormat(this.cookieFormat, name, encodeURIComponent(value), dateUtil.getDate());
+                document.cookie = this.stringFormat(this.cookieFormat, name, encodeURIComponent(value), dateUtil.getDate(), path);
             },
 
             getCookie : function (name) {
