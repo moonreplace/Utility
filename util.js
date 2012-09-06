@@ -1,4 +1,4 @@
-/*global document*/
+/*global document,self*/
 /**
  * Created for multilating cookies(include setting, getting and deleting)
  * User: Cris.dai
@@ -28,6 +28,7 @@ var Utility = Utility || {};
             };
         }()),
         formatRE = /\{(\d+)\}/g,
+        xmlHttpTypes = ['Msxml2.XMLHTTP', 'Microsoft.XMLHTTP', 'Msxml2.XMLHTTP.4.0'],
 
         stringUtil = {
             format : function () {
@@ -64,7 +65,48 @@ var Utility = Utility || {};
                     document.cookie = this.stringFormat(this.cookieFormat, name, currentVal, dateUtil.getDate());
                 }
             }
+        },
+        xhrUtil = {
+            createXHR : function () {
+                var xhr, i, xmlHttpType;
+                if (self.XMLHttpRequest) {
+                    xhr = new self.XMLHttpRequest();
+                } else if (typeof self.ActiveXObject !== "undefined") {
+                    for (i = 0; i < 3; i += 1) {
+                        xmlHttpType = xmlHttpTypes[i];
+                        try {
+                            xhr = new self.ActiveXObject(xmlHttpType);
+                        } catch (e) { }
+
+                        if (xhr) {
+                            break;
+                        }
+                    }
+                }
+                return xhr;
+            },
+            get : function (url, callback, errorCallback) {
+                var xhr = this.createXHR();
+                xhr.open('GET', url, true);
+                xhr.onreadystatechange = function () {
+                    var status, errorInfo;
+                    if (xhr.readyState === 4) {
+                        status = xhr.status;
+                        if (status > 399 && status < 600) {
+                            errorInfo = url + "error status: " + status;
+                            if (errorCallback) {
+                                errorCallback(errorInfo);
+                            } else {
+                                throw new Error(errorInfo);
+                            }
+                        } else {
+                            callback(xhr.responseText);
+                        }
+                    }
+                };
+            }
         };
+    Utility.Ajax = xhrUtil;
     Utility.Cookies = cookieUtil;
     Utility.StringUtil = stringUtil;
 }());
