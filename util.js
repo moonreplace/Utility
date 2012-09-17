@@ -1,4 +1,4 @@
-/*global document,self*/
+/*global document,self, opera, console*/
 /**
  * Created for multilating cookies(include setting, getting and deleting)
  * User: Cris.dai
@@ -105,9 +105,51 @@ var Utility = Utility || {};
                     }
                 };
             }
+        },
+        consoleUtil = {
+            log : function () {
+                try {
+                    console.log.apply(console, arguments);
+                } catch (e) {
+                    try {
+                        opera.postError.apply(opera, arguments);//Tries to log the Opera way
+                    } catch (ex) {
+                        self.alert(Array.prototype.join.call(arguments));
+                    }
+                }
+            },
+            time : function (name, reset) {
+                if (!name) { return; }
+                var time = new Date().getTime(),
+                    key = "KEY" + name.toString();
+                if (!this.timeCounters) {
+                    this.timeCounters = {};
+                }
+                if (!reset && this.timeCounters[key]) {
+                    return;
+                }
+                this.timeCounters[key] = time;
+            },
+            timeEnd : function (name) {
+                var time = new Date().getTime(),
+                    key = "KEY" + name.toString(),
+                    timeCounter = this.timeCounters[key],
+                    diff = time - timeCounter,
+                    label = stringUtil.format('{0} : {1} ms', name, diff);
+                if (!this.timeCounters) {
+                    return;
+                }
+                if (timeCounter) {
+                    this.log(label);
+                    delete this.timeCounters[key];
+                }
+                return diff;
+            }
         };
     Utility.Ajax = xhrUtil;
     Utility.Cookies = cookieUtil;
     Utility.StringUtil = stringUtil;
+    /*Implement the console for which is not support console*/
+    Utility.Console = consoleUtil;
 }());
 
