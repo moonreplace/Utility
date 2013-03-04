@@ -79,6 +79,8 @@ var Utility = Utility || {};
                         } catch (e) { }
 
                         if (xhr) {
+                            //remove all active XMLHttpRequest
+                            xhr.abort();
                             break;
                         }
                     }
